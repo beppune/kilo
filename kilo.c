@@ -18,6 +18,7 @@
 /*** data ***/
 
 struct editorConfig {
+    int cy, cx;
     int screenrows;
     int screencols;
     struct termios orig_termios;
@@ -131,7 +132,7 @@ void editorDrawRows(struct abuf * ab) {
 
     char msg[E.screencols];
     int s = snprintf(msg, sizeof(msg),
-            "Kilo editor (%s). Enter <SC> for help.",
+            "Kilo editor (%s). <SC> for help, 'CTRL + q' to quit without saving.",
             KILO_VERSION);
     abuf_append(ab, msg, s);
     abuf_append(ab, "\x1b[K", 3);
@@ -146,7 +147,10 @@ void editorRefreshScreen() {
 
     editorDrawRows(&ab);
 
-    abuf_append(&ab, "\x1b[H", 3);
+    char buf[32];
+    snprintf(buf, sizeof(buf), "\x1b[%d;%dH", E.cy + 1, E.cx + 1);
+    abuf_append(&ab, buf, strlen(buf) );
+
     abuf_append(&ab, "\x1b[?25h", 6);
 
     write(STDOUT_FILENO, ab.b, ab.len);
@@ -170,6 +174,10 @@ void editorProcessKeypress() {
 /*** init ***/
 
 void initEditor() {
+
+    E.cy = 0;
+    E.cx = 0;
+
     if (getWindowSize(&E.screenrows, &E.screencols) == -1) die("getWindowSize");
 }
 
