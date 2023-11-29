@@ -1,3 +1,3 @@
 
 kilo: kilo.c
-	cc -Wall -Wpedantic kilo.c
+	gcc -Wall -Wpedantic kilo.c
